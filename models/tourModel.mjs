@@ -1,0 +1,131 @@
+import mongoose from 'mongoose';
+import slugify from 'slugify';
+// import validator from 'validator';
+
+const toursSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'A tour must have a name'],
+    unique: true,
+    trim: true,
+    maxlength: [40, 'A tour name must have less or equal then 40 characters'],
+    minlength: [10, 'A tour name must have more or equal then 10 characters'],
+    // validate: [validator.isAlpha, 'Tour name must only contain characters'], // not useful here cause throws error for empty spaces too
+  },
+  slug: {
+    type: String,
+  },
+  duration: {
+    type: Number,
+    required: [true, 'A tour must have a duration']
+  },
+  maxGroupSize: {
+    type: Number,
+    required: [true, 'A tour must have a group size']
+  },
+  difficulty: {
+    type: String,
+    required: [true, 'A group must have a difficulty'],
+    enum: {
+      values: ['easy', 'medium', 'difficult'],
+      message: 'Difficulty is either: easy, medium, difficult'
+    }
+  },
+  ratingsAverage: {
+    type: Number,
+    default: 4.5,
+    min: [1, 'Ratings must be above 1.0'],
+    max: [5, 'Ratings must be below 5.0']
+  },
+  ratingsQuantity: {
+    type: Number,
+    default: 0
+  },
+  price: {
+    type: Number,
+    required: [true, 'A tour must have a price'],
+  },
+  priceDiscount: {
+    type: Number,
+    validate: {
+      validator: function (val) {
+        //NOTE: 'this' only points to current doc on NEW document creation (this function wouldn't work on UPDATE)
+        return val < this.price;
+      },
+      message: 'Discount price ({VALUE}) should be below regular price'  // {VALUE} is mongoose based syntax. Output:  Discount price (250) should be below regular price
+    }
+  },
+  summary: {
+    type: String,
+    trim: true,
+    required: [true, 'A tour must have a summary']
+  },
+  description: {
+    type: String,
+    trim: true,
+  },
+  imageCover: {
+    type: String,
+    required: [true, 'A tour must have a cover image']
+  },
+  images: [String],
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+    select: false
+  },
+  startDates: [Date],
+  secretTour: {
+    type: Boolean,
+    default: false,
+  }
+},
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  });
+
+toursSchema.virtual('durationWeeks').get(function () {
+  return this.duration / 7;
+});
+
+// DOCUMENT MIDDLEWARE: runs before .save() and .create()
+toursSchema.pre('save', function (next) {
+  this.slug = slugify(this.name, { lower: true }); // -> 'this' points/refers to the DOCUMENT being saved and this is necessary when using a regular function is necessary when manipulating document
+  next();
+});
+
+// toursSchema.pre('save', (next) => {
+//   console.log("Bu spremil dokumenta..."); // We're not using this, just doc, so an arrow function is perfectly fine here
+//   next();
+// })
+
+// toursSchema.post('save', (doc, next) => {
+//   console.log(doc);
+//   next();
+// });
+
+//QUERY MIDDLEWARE
+// toursSchema.pre('find', function (next) {
+toursSchema.pre(/^find/, function (next) {
+  this.find({ secretTour: { $ne: true } });  // 'this' points to QUERY
+
+  this.start = Date.now();
+  next();
+});
+
+toursSchema.post(/^find/, function (docs, next) {
+  console.log(`Query took ${Date.now() - this.start} milliseconds!`);
+  next();
+});
+
+//AGGREGATION MIDDLEWARE
+toursSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+  console.log(this); // -> 'this' points to current AGGREGATION OBJECT
+  next();
+});
+
+const Tour = mongoose.model('Tour', toursSchema);
+
+export default Tour;

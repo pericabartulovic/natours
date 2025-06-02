@@ -1,5 +1,6 @@
 import Tour from '../models/tourModel.mjs';
 import APIFeatures from '../utils/apiFeatures.mjs';
+import AppError from '../utils/appError.mjs';
 import catchAsync from '../utils/catchAsync.mjs';
 
 const tourController = {
@@ -106,6 +107,11 @@ const tourController = {
 
     const tour = await Tour.findById(req.params.id);
     //OR:      = await Tour.findOne({_id: req.params.id}) >>><<< findById(req.params.id) is shorthand for it.
+
+    if (!tour) {
+      return next(new AppError('No tour found with that ID', 404)); // return --> to exit func immediately and not to proceed to next line...
+    }
+
     res.status(200).json({
       status: 'success',
       data: {
@@ -142,6 +148,11 @@ const tourController = {
       new: true, //returns new, updated document
       runValidators: true, // runs validators again same as in creation process -> see toursSchema in tourMode.mjs
     });
+
+    if (!tour) {
+      return next(new AppError('No tour found with that ID', 404)); // return --> to exit func immediately and not to proceed to next line...
+    }
+
     res.status(200).json({
       status: 'success',
       data: {
@@ -151,7 +162,12 @@ const tourController = {
   }),
 
   deleteTour: catchAsync(async (req, res, next) => {
-    await Tour.findByIdAndDelete(req.params.id);
+    const tour = await Tour.findByIdAndDelete(req.params.id);
+
+    if (!tour) {
+      return next(new AppError('No tour found with that ID', 404)); // return --> to exit func immediately and not to proceed to next line...
+    }
+
     res.status(204).json({
       status: 'success',
       data: null,

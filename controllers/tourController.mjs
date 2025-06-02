@@ -12,7 +12,7 @@ const tourController = {
     next();
   },
 
-  getAllTours: catchAsync(async (req, res) => {
+  getAllTours: catchAsync(async (req, res, next) => {
     // const queryObj = { ...req.query };
     /* In an older version of Express, where query strings like this:
     ?duration[gte]=5&difficulty=easy   -> from 'http://localhost:3000/api/v1/tours?duration[gte]=5&difficulty=easy'
@@ -94,7 +94,7 @@ const tourController = {
     });
   }),
 
-  getTour: catchAsync(async (req, res) => {
+  getTour: catchAsync(async (req, res, next) => {
     /*
       for optional paramater we add ? eg. '/api/v1/tours/:id/x?' 
       then on request to '/api/v1/tours/5' /x is ommited - cl would return:
@@ -137,7 +137,7 @@ const tourController = {
   }),
 
 
-  updateTour: catchAsync(async (req, res) => {
+  updateTour: catchAsync(async (req, res, next) => {
     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
       new: true, //returns new, updated document
       runValidators: true, // runs validators again same as in creation process -> see toursSchema in tourMode.mjs
@@ -150,7 +150,7 @@ const tourController = {
     });
   }),
 
-  deleteTour: catchAsync(async (req, res) => {
+  deleteTour: catchAsync(async (req, res, next) => {
     await Tour.findByIdAndDelete(req.params.id);
     res.status(204).json({
       status: 'success',
@@ -158,7 +158,7 @@ const tourController = {
     });
   }),
 
-  getTourStats: catchAsync(async (req, res) => {
+  getTourStats: catchAsync(async (req, res, next) => {
     const stats = await Tour.aggregate([
       {
         $match: { ratingsAverage: { $gte: 4.5 } }
@@ -188,7 +188,7 @@ const tourController = {
     });
   }),
 
-  getMonthlyPlan: catchAsync(async (req, res) => {
+  getMonthlyPlan: catchAsync(async (req, res, next) => {
     const year = +req.params.year;  // 2021
     const plan = await Tour.aggregate([
       {

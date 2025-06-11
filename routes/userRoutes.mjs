@@ -1,7 +1,11 @@
 import express from "express";
 import userController from "../controllers/userController.mjs";
+import authController from "../controllers/authController.mjs"
 
 const router = express.Router();
+
+router.
+  post('/signup', authController.signup);
 
 router
   .route('/')

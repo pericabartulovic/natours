@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import validator from 'validator';
+import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -24,10 +25,28 @@ const userSchema = new mongoose.Schema({
   passwordConfirm: {
     type: String,
     required: [true, 'Please, confirm your password'],
-    // validate: [validator.isStrongPassword, 'Password has to contain at least one big letter, number and special sign']
+    validate: {
+      // this only works on CREATE and SAVE!!!
+      validator: function (el) {
+        return el === this.password;
+      },
+      message: 'Passwords do not match',
+    },
   },
 });
 
-const User = mongoose.model('Tour', userSchema);
+userSchema.pre('save', async function (next) {
+  // Only run this function if password was acttually modified
+  if (!this.isModified('password')) return next();
+
+  // Hash the password with cost of 12
+  this.password = await bcrypt.hash(this.password, 12);
+
+  // Delete passwordConfirm field
+  this.passwordConfirm = undefined;
+  next()
+});
+
+const User = mongoose.model('User', userSchema);
 
 export default User;

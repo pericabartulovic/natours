@@ -39,7 +39,7 @@ export default class APIFeatures {
       const fields = this.reqQuery.fields.split(',').join(' ');
       this.mongoQuery = this.mongoQuery.select(fields);     //////// PROJECTING  ////////////
     } else {
-      this.mongoQuery = this.mongoQuery.select('-__v');
+      this.mongoQuery = this.mongoQuery.select('-__v');  // .select + or - === include or exclude fields
     }
     return this;
   }

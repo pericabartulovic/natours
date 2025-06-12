@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please, provide a password'],
     minlength: 8,
+    select: false,
     // validate: [validator.isStrongPassword, 'Password has to contain at least one big letter, number and special sign']
   },
   passwordConfirm: {
@@ -44,8 +45,13 @@ userSchema.pre('save', async function (next) {
 
   // Delete passwordConfirm field
   this.passwordConfirm = undefined;
-  next()
+  next();
 });
+
+
+userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+}
 
 const User = mongoose.model('User', userSchema);
 

@@ -1,3 +1,4 @@
+import { promisify } from 'util';                 // promisify() converts a callback-based function into one that returns a Promise
 import jwt from 'jsonwebtoken';
 import User from "../models/userModel.mjs";
 import catchAsync from "../utils/catchAsync.mjs";
@@ -14,7 +15,8 @@ const authController = {
       name: req.body.name,
       email: req.body.email,
       password: req.body.password,
-      passwordConfirm: req.body.passwordConfirm
+      passwordConfirm: req.body.passwordConfirm,
+      passwordChangedAt: req.body.passwordChangedAt,
     });
 
     const token = signToken(newUser._id);
@@ -40,7 +42,6 @@ const authController = {
     const user = await User.findOne({ email }).select('+password');  // .select + or - === include or exclude fields
 
     if (!user || !(await user.correctPassword(password, user.password))) {
-      console.log('user.password:', user?.password);
       return next(new AppError('Incorrect email or password', 401));
     }
 
@@ -50,6 +51,51 @@ const authController = {
       status: 'success',
       token,
     });
+  }),
+
+  protect: catchAsync(async (req, res, next) => {
+    // 1) Getting token and check of it's therr
+    let token;
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (!token) {
+      return next(new AppError('You are not logged in! Please log in to get access.', 401));
+    }
+
+    // 2) Verification token
+    /**
+     * promisify() converts a callback-based function into one that returns a Promise
+     * .verify official docs: (Asynchronous) If a callback is supplied. (Synchronous) If a callback is not supplied
+     * to stay on line with async await pattern instructor uses promisify and for cleaner code and to potentially work with catchAsync
+     * It looks like this internally:
+     * jwt.verify(token, secret, (err, decoded) => { ... }); 
+     * //OR:
+     * jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          // handle error
+        }
+        // use decoded
+      });
+     */
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    console.log(decoded);
+
+    // 3) Check if user still exists
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+      return next(new AppError('The user beloging to this token does not exist.', 401));
+    }
+
+    // 4) Check if user changed password after the token was issued
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      return next(new AppError('User recently changed password! Please login again.', 401))
+    }
+
+    // GRANT ACCESS TO PROTECTED ROUTE
+    req.user = currentUser;
+    next();
   }),
 };
 

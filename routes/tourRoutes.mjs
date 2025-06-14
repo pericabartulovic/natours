@@ -1,5 +1,6 @@
 import express from 'express';
 import tourController from '../controllers/tourController.mjs';
+import authController from '../controllers/authController.mjs';
 
 const router = express.Router();
 
@@ -34,7 +35,7 @@ router.
 
 router
   .route('/')
-  .get(tourController.getAllTours)
+  .get(authController.protect, tourController.getAllTours)                     // .protect -> protecting tour routes
   .post(tourController.createTour);
 
 router

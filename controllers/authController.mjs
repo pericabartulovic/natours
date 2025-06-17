@@ -1,8 +1,11 @@
 import { promisify } from 'util';                 // promisify() converts a callback-based function into one that returns a Promise
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+
 import User from "../models/userModel.mjs";
 import catchAsync from "../utils/catchAsync.mjs";
 import AppError from '../utils/appError.mjs';
+import sendEmail from '../utils/email.mjs';
 
 const signToken = id => jwt.sign({ id }, process.env.JWT_SECRET, {
   expiresIn: process.env.JWT_EXPIRES_IN,
@@ -119,11 +122,56 @@ const authController = {
     await user.save({ validateBeforeSave: false });
 
     // 3) Send it to user's email
+    const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
+    const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}
+                    \nIf you didn't forget your password, please ignore this email!`;
 
-    // next();
+
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Your password reset token (valid for 10 min)',
+        message,
+      })
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Token sent to email!',
+      });
+    } catch (err) {
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+
+      return next(new AppError('There was an error sending the email. Please, try again later.', 500));
+    }
   }),
 
-  resetPassword: (req, res, next) => { }
+  resetPassword: catchAsync(async (req, res, next) => {
+    // 1) Get user based on the token
+    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+    const user = await User.findOne({ passwordResetToken: hashedToken, passwordResetExpires: { $gte: Date.now() } });
+
+    // 2) If token has not expired, and there is user, set the new password
+    if (!user) {
+      return next(new AppError('Token is invalid or has expired.', 400))
+    }
+
+    user.password = req.body.password;
+    user.passwordConfirm = req.body.passwordConfirm;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+
+    // 3) Update changedPasswordAt property for the user
+    await user.save();
+
+    // 4) Log the user in, send JWT
+    const token = signToken(user._id);
+    res.status(200).json({
+      status: 'success',
+      token,
+    });
+  }),
 };
 
 export default authController;

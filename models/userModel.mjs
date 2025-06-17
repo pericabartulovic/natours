@@ -54,9 +54,13 @@ userSchema.pre('save', async function (next) {
 
   // Delete passwordConfirm field
   this.passwordConfirm = undefined;
+
+  if (!this.isNew) {
+    this.passwordChangedAt = Date.now() - 1000; //sometimes it happens that token is created a bit before change timestamp has actually been created - hence '-1000' miliseconds or 1 sec.!
+  }
+
   next();
 });
-
 
 userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
   return await bcrypt.compare(candidatePassword, userPassword);

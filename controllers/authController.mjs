@@ -172,6 +172,29 @@ const authController = {
       token,
     });
   }),
+
+  updatePassword: catchAsync(async (req, res, next) => {
+    // 1) Get user from collection
+    const user = await User.findOne({ email: req.user.email }).select('+password');
+
+    // 2) Check if POSTed current password is correct
+    if (!user || !(await user.correctPassword(req.body.password, user.password))) {
+      return next('Incorrect current password, please try again', 400)
+    }
+
+    user.password = req.body.newPassword;
+    user.passwordConfirm = req.body.passwordConfirm;
+
+    // 3) If correct, update password
+    await user.save();
+
+    // 4) Log in user, send JWT
+    const token = signToken(user._id);
+    res.status(200).json({
+      status: 'success',
+      token,
+    });
+  }),
 };
 
 export default authController;

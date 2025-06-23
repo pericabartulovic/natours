@@ -29,6 +29,10 @@ const userController = {
       return next(new AppError('This route is not for password updates. Please use /updateMyPassword', 400));
     }
 
+    if (req.body.role) {
+      return next(new AppError('You are not allowed to update your role!', 403))
+    }
+
     // 2) Filter out unwanted fields name that are not allowed to be updated
     const filteredBody = filterOjb(req.body, 'name', 'email');
 
@@ -43,6 +47,15 @@ const userController = {
       data: {
         user: updatedUser,
       }
+    });
+  }),
+
+  deleteMe: catchAsync(async (req, res, next) => {
+    await User.findByIdAndUpdate(req.user.id, { active: false });
+
+    res.status(204).json({
+      staus: 'success',
+      data: null,
     });
   }),
 

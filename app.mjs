@@ -79,11 +79,6 @@ app.use(
   })
 );
 
-app.use((req, res, next) => {
-  console.log(req.query);
-  next();
-})
-
 // Data sanitization against NoSQL query injection
 app.use((req, res, next) => {
   // Sanitize req.body safely by replacing

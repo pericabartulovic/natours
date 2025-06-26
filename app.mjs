@@ -1,5 +1,12 @@
 import express from 'express';
 import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';                 //Help secure Express apps by setting HTTP response headers
+import sanitize from 'mongo-sanitize';
+import sanitizeHtml from 'sanitize-html';
+import hpp from 'hpp';
+import qs from 'qs';
+
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -13,17 +20,128 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-//////////////// 1. MIDDLWARES ///////////////////
+//////////////// 1. GLOBAL MIDDLWARES ///////////////////
+// Set security HTTP headers
+app.use(helmet());         //always as first middleware
+
+// Development logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-app.use(express.json());
+// Limit requests from same IP
+const limiter = rateLimit({
+  limit: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'To many requests from this IP, please try again in one hour!'
+});
+
+app.use('/api', limiter);
+
+// Body parser, reading data from body into req.body
+app.use(express.json({ limit: '10kb' }));
+
+// Secure query string parsing (prevents prototype pollution via query)
+app.set('query parser', str => qs.parse(str, { allowPrototypes: false }));
+
+const sanitizePrototypePollution = (obj) => {
+  if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+    Object.keys(obj).forEach(key => {
+      if (['__proto__', 'constructor', 'prototype'].includes(key)) {
+        delete obj[key];
+      } else {
+        sanitizePrototypePollution(obj[key]);
+      }
+    });
+  }
+};
+
+// 🚨 Sanitize against prototype pollution
+app.use((req, res, next) => {
+  sanitizePrototypePollution(req.body);
+  sanitizePrototypePollution(req.query);
+  sanitizePrototypePollution(req.params);
+  next();
+});
+
+// Prevent parameter pollution
+app.use(
+  hpp({
+    whitelist: [
+      // allow duplicates for these query params (optional)
+      'duration',
+      'price',
+      'difficulty',
+      'maxGroupSize',
+      'ratingsAverage',
+      'ratingsQuantity',
+    ]
+  })
+);
+
+app.use((req, res, next) => {
+  console.log(req.query);
+  next();
+})
+
+// Data sanitization against NoSQL query injection
+app.use((req, res, next) => {
+  // Sanitize req.body safely by replacing
+  if (req.body) {
+    req.body = sanitize(req.body);
+  }
+
+  // Sanitize req.query IN-PLACE (mutate keys)
+  if (req.query) {
+    Object.keys(req.query).forEach(key => {
+      req.query[key] = sanitize(req.query[key]);
+    });
+  }
+
+  // Sanitize req.params IN-PLACE (mutate keys)
+  if (req.params) {
+    Object.keys(req.params).forEach(key => {
+      req.params[key] = sanitize(req.params[key]);
+    });
+  }
+  next();
+});
+
+// Data sanitization against XSS
+app.use((req, res, next) => {
+  if (req.body) {
+    Object.entries(req.body).forEach(([key, value]) => {
+      if (typeof value === 'string') {
+        req.body[key] = sanitizeHtml(value);
+      }
+    });
+  }
+
+  if (req.query) {
+    Object.entries(req.query).forEach(([key, value]) => {
+      if (typeof value === 'string') {
+        req.query[key] = sanitizeHtml(value);
+      }
+    });
+  }
+
+  if (req.params) {
+    Object.entries(req.params).forEach(([key, value]) => {
+      if (typeof value === 'string') {
+        req.params[key] = sanitizeHtml(value);
+      }
+    });
+  }
+  next();
+});
+
+// Serving static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Custom req attribute (here: requestTime)
+// Test middleware - custom req attribute (here: requestTime)
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  // console.log(req.headers);
   next();
 });
 

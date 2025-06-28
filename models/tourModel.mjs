@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import slugify from 'slugify';
+// import User from './userModel.mjs';
 // import validator from 'validator';
 
 const toursSchema = new mongoose.Schema({
@@ -78,7 +79,38 @@ const toursSchema = new mongoose.Schema({
   secretTour: {
     type: Boolean,
     default: false,
-  }
+  },
+  startLocation: {
+    // GeoJSON
+    type: {
+      type: String,
+      default: 'Point',
+      enum: ['Point']
+    },
+    coordinates: [Number],
+    address: String,
+    description: String,
+  },
+  locations: [
+    {
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point']
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+      day: Number,
+    }
+  ],
+  // guides: Array, // array of ids for embbeding -> see: tourSchema.pre('save',....)
+  guides: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User'
+    }
+  ],
 },
   {
     toJSON: { virtuals: true },
@@ -94,6 +126,13 @@ toursSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true }); // -> 'this' points/refers to the DOCUMENT being saved and this is necessary when using a regular function is necessary when manipulating document
   next();
 });
+
+// Embbeding user data into Tours
+// toursSchema.pre('save', async function (next) {
+//   const guidesPromises = this.guides.map(async id => await User.findById(id));
+//   this.guides = await Promise.all(guidesPromises);
+//   next();
+// });
 
 // toursSchema.pre('save', (next) => {
 //   console.log("Bu spremil dokumenta..."); // We're not using this, just doc, so an arrow function is perfectly fine here
@@ -113,6 +152,15 @@ toursSchema.pre(/^find/, function (next) {
   this.start = Date.now();
   next();
 });
+
+toursSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt'
+  });
+
+  next();
+})
 
 toursSchema.post(/^find/, function (docs, next) {
   console.log(`Query took ${Date.now() - this.start} milliseconds!`);

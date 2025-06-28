@@ -14,7 +14,7 @@ mongoose
   });
 
 // READ JSON FILE
-const tours = JSON.parse(fs.readFileSync(join(process.cwd(), 'dev-data', 'data', 'tours-simple.json'), 'utf-8'));
+const tours = JSON.parse(fs.readFileSync(join(process.cwd(), 'dev-data', 'data', 'tours.json'), 'utf-8'));
 
 // IMPORT DATA INTO DB
 const importData = async () => {

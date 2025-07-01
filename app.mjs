@@ -12,6 +12,7 @@ import { fileURLToPath } from 'url';
 
 import tourRouter from './routes/tourRoutes.mjs';
 import userRouter from './routes/userRoutes.mjs';
+import reviewRouter from './routes/reviewRoutes.mjs';
 import AppError from './utils/appError.mjs';
 import globalErrorHandler from './controllers/errorController.mjs';
 
@@ -143,6 +144,7 @@ app.use((req, res, next) => {
 //////////////// 2. ROUTES ///////////////////
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 app.all('/{*any}', (req, res, next) => {
 

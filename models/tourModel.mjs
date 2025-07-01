@@ -114,7 +114,8 @@ const toursSchema = new mongoose.Schema({
 },
   {
     toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    toObject: { virtuals: true },
+    id: false,
   });
 
 toursSchema.virtual('durationWeeks').get(function () {
@@ -160,7 +161,7 @@ toursSchema.pre(/^find/, function (next) {
   });
 
   next();
-})
+});
 
 toursSchema.post(/^find/, function (docs, next) {
   console.log(`Query took ${Date.now() - this.start} milliseconds!`);

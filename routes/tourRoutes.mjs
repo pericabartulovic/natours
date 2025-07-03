@@ -1,6 +1,7 @@
 import express from 'express';
 import tourController from '../controllers/tourController.mjs';
 import authController from '../controllers/authController.mjs';
+import reviewRouter from './reviewRoutes.mjs';
 
 const router = express.Router();
 
@@ -20,6 +21,13 @@ const router = express.Router();
  * @param {Function} middleware - The handler function to execute (e.g., checkId).
  */
 // router.param('id', tourController.checkId);
+
+///////////// NESTED ROUTES IN EXPRESS
+// POST /tour/234sdf2/reviews
+// GET /tour/234sdf2/reviews
+
+router.use('/:tourId/reviews', reviewRouter); // whenever is this route pattern met it will be assigned to reviewRouter
+//////////////// END //////////////////////////
 
 router
   .route('/top-5-cheap')
@@ -42,6 +50,6 @@ router
   .route('/:id')
   .get(tourController.getTour)
   .patch(tourController.updateTour)
-  .delete(authController.protect, authController.restrictTo('admin', 'lead-guide'), tourController.deleteTour)
+  .delete(authController.protect, authController.restrictTo('admin', 'lead-guide'), tourController.deleteTour);
 
 export default router;

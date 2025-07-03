@@ -105,7 +105,7 @@ const tourController = {
     // const tour =  tours[id] -> data could be erased from base so shifted it could return wrong element based on position in array...
     // const tour = tours.find((t) => t.id === id);   // safe and dynamic approach
 
-    const tour = await Tour.findById(req.params.id);
+    const tour = await Tour.findById(req.params.id).populate('reviews');
     //OR:      = await Tour.findOne({_id: req.params.id}) >>><<< findById(req.params.id) is shorthand for it.
 
     if (!tour) {

@@ -122,6 +122,13 @@ toursSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+// Virtual populate
+toursSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id'
+});
+
 // DOCUMENT MIDDLEWARE: runs before .save() and .create()
 toursSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true }); // -> 'this' points/refers to the DOCUMENT being saved and this is necessary when using a regular function is necessary when manipulating document

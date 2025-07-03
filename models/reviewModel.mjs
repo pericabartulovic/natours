@@ -35,24 +35,23 @@ const reviewSchema = new mongoose.Schema({
   }
 );
 
-// reviewSchema.pre(/^find/, function (next) {
-//   // this
-//   //   .populate({          // this is over populate for app ux
-//   //     path: 'tour',
-//   //     select: 'name'
-//   //   })
-//   //   .populate({
-//   //     path: 'user',
-//   //     select: 'name photo'
-//   //   });
-//   this
-//     .populate({
-//       path: 'user',
-//       select: 'name photo'
-//     });
+reviewSchema.pre(/^find/, function (next) {
+  //   // this
+  //   //   .populate({          // this is over populate for app ux
+  //   //     path: 'tour',
+  //   //     select: 'name'
+  //   //   })
+  //   //   .populate({
+  //   //     path: 'user',
+  //   //     select: 'name photo'
+  //   //   });
+  this.populate({
+    path: 'user',
+    select: 'name photo'
+  });
 
-//   next();
-// });
+  next();
+});
 
 const Review = mongoose.model('Review', reviewSchema);
 

@@ -2,6 +2,7 @@ import Tour from '../models/tourModel.mjs';
 import APIFeatures from '../utils/apiFeatures.mjs';
 import AppError from '../utils/appError.mjs';
 import catchAsync from '../utils/catchAsync.mjs';
+import factory from './handlerFactory.mjs';
 
 const tourController = {
   aliasTopTours: (req, res, next) => {               // prefilling query string (for user, so he doesn't need to)
@@ -161,18 +162,20 @@ const tourController = {
     });
   }),
 
-  deleteTour: catchAsync(async (req, res, next) => {
-    const tour = await Tour.findByIdAndDelete(req.params.id);
+  deleteTour: factory.deleteOne(Tour),
 
-    if (!tour) {
-      return next(new AppError('No tour found with that ID', 404)); // return --> to exit func immediately and not to proceed to next line...
-    }
+  // deleteTour: catchAsync(async (req, res, next) => {
+  //   const tour = await Tour.findByIdAndDelete(req.params.id);
 
-    res.status(204).json({
-      status: 'success',
-      data: null,
-    });
-  }),
+  //   if (!tour) {
+  //     return next(new AppError('No tour found with that ID', 404)); // return --> to exit func immediately and not to proceed to next line...
+  //   }
+
+  //   res.status(204).json({
+  //     status: 'success',
+  //     data: null,
+  //   });
+  // }),
 
   getTourStats: catchAsync(async (req, res, next) => {
     const stats = await Tour.aggregate([

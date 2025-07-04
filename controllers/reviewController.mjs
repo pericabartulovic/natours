@@ -1,6 +1,7 @@
 import Review from '../models/reviewModel.mjs';
 import AppError from '../utils/appError.mjs';
 import catchAsync from '../utils/catchAsync.mjs';
+import factory from './handlerFactory.mjs';
 
 const reviewController = {
   getAllreviews: catchAsync(async (req, res, next) => {
@@ -46,6 +47,8 @@ const reviewController = {
       }
     })
   }),
+
+  deleteReview: factory.deleteOne(Review),
 };
 
 export default reviewController;

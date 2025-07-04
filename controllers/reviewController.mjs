@@ -18,20 +18,15 @@ const reviewController = {
     });
   }),
 
-  createReview: catchAsync(async (req, res, next) => {
+  setUserIds: (req, res, next) => {
     // Allow nested routes
     if (!req.body.tour) req.body.tour = req.params.tourId;
     if (!req.body.user) req.body.user = req.user.id;
 
-    const newReview = await Review.create(req.body);
+    next();
+  },
 
-    res.status(201).json({
-      status: 'success',
-      data: {
-        tour: newReview
-      },
-    });
-  }),
+  createReview: factory.createOne(Review),
 
   getReview: catchAsync(async (req, res, next) => {
     const review = await Review.findById(req.params.id);
@@ -48,6 +43,7 @@ const reviewController = {
     })
   }),
 
+  updateReview: factory.updateOne(Review),
   deleteReview: factory.deleteOne(Review),
 };
 

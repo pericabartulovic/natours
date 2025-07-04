@@ -17,13 +17,17 @@ router.delete('/deleteMe', authController.protect, userController.deleteMe);
 
 router
   .route('/')
-  .get(userController.getAllUsers)
-  .post(userController.createUser);
+  .get(userController.getAllUsers);
+// .post(userController.createUser);   // for this we have auth controller and sign up logic
 
 router
   .route('/:id')
   .get(userController.getUser)
-  .patch(userController.updateUser)
+  .patch(
+    authController.protect,
+    authController.restrictTo('admin'),
+    userController.updateUser
+  )
   .delete(
     authController.protect,
     authController.restrictTo('admin'),

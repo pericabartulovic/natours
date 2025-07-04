@@ -67,20 +67,15 @@ const userController = {
     })
   },
 
-  createUser(req, res) {
-    res.status(500).json({
-      status: 500,
-      message: "This route is not yet defined."
-    })
-  },
+  // createUser(req, res) {        // for this we have auth controller and sign up logic
+  //   res.status(500).json({
+  //     status: 500,
+  //     message: "This route is not yet defined."
+  //   })
+  // },
 
-  updateUser(req, res) {
-    res.status(500).json({
-      status: 500,
-      message: "This route is not yet defined."
-    })
-  },
-
+  // Do NOT update passwords with this!
+  updateUser: factory.updateOne(User),
   deleteUser: factory.deleteOne(User),
 }
 

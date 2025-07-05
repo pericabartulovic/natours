@@ -135,20 +135,8 @@ toursSchema.pre('save', function (next) {
   next();
 });
 
-// Embbeding user data into Tours
-// toursSchema.pre('save', async function (next) {
-//   const guidesPromises = this.guides.map(async id => await User.findById(id));
-//   this.guides = await Promise.all(guidesPromises);
-//   next();
-// });
-
-// toursSchema.pre('save', (next) => {
-//   console.log("Bu spremil dokumenta..."); // We're not using this, just doc, so an arrow function is perfectly fine here
-//   next();
-// })
-
 // toursSchema.post('save', (doc, next) => {
-//   console.log(doc);
+//   console.log(doc); // We're not using 'this', just doc, so an arrow function is perfectly fine here
 //   next();
 // });
 
@@ -162,6 +150,12 @@ toursSchema.pre(/^find/, function (next) {
 });
 
 toursSchema.pre(/^find/, function (next) {
+  // Embbeding user data into Tours
+  // toursSchema.pre('save', async function (next) {
+  //   const guidesPromises = this.guides.map(async id => await User.findById(id));
+  //   this.guides = await Promise.all(guidesPromises);
+  //   next();
+  // }); // OR: simply:
   this.populate({
     path: 'guides',
     select: '-__v -passwordChangedAt'

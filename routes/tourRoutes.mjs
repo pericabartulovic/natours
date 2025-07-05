@@ -4,25 +4,11 @@ import authController from '../controllers/authController.mjs';
 import reviewRouter from './reviewRoutes.mjs';
 
 const router = express.Router();
-
-/**
- * Route parameter middleware for validating the `id` parameter.
- *
- * This middleware runs automatically for any route that includes `:id`
- * and ensures that the provided `id` is valid before continuing to the
- * corresponding route handler.
- *
- * Benefits:
- * - Centralizes parameter validation logic for cleaner controller functions.
- * - Prevents route handler execution if the `id` is invalid (e.g., not found).
- * - Improves maintainability by separating concerns.
- *
- * @param {string} param - The route parameter name (e.g., 'id').
- * @param {Function} middleware - The handler function to execute (e.g., checkId).
- */
-// router.param('id', tourController.checkId);
-
-///////////// NESTED ROUTES IN EXPRESS
+/*
+  for optional paramater we add ? eg. '/api/v1/tours/:id/x?' 
+  then on request to '/api/v1/tours/5' /x is ommited - cl would return: { id: 5, x: undefined}
+*/
+///////////// NESTED ROUTES IN EXPRESS //////
 // POST /tour/234sdf2/reviews
 // GET /tour/234sdf2/reviews
 
@@ -43,7 +29,7 @@ router.
 
 router
   .route('/')
-  .get(authController.protect, tourController.getAllTours)                     // .protect -> protecting tour routes
+  .get(authController.protect, tourController.getAllTours)
   .post(tourController.createTour);
 
 router

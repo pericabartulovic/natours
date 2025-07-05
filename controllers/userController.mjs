@@ -12,18 +12,6 @@ const filterOjb = (obj, ...allowedFields) => {
 }
 
 const userController = {
-  getAllUsers: catchAsync(async (req, res, next) => {
-    const users = await User.find();
-
-    res.status(200).json({
-      status: 'success',
-      results: users.length,
-      data: {
-        users,
-      },
-    });
-  }),
-
   updateMe: catchAsync(async (req, res, next) => {
     // 1) Create error if user POSTs password data
     if (req.body.password || req.body.passwordConfirm) {
@@ -60,21 +48,16 @@ const userController = {
     });
   }),
 
-  getUser(req, res) {
+  createUser(req, res) {
     res.status(500).json({
       status: 500,
-      message: "This route is not yet defined."
+      message: "This route is not yet defined. Please use /signup instead."
     })
   },
 
-  // createUser(req, res) {        // for this we have auth controller and sign up logic
-  //   res.status(500).json({
-  //     status: 500,
-  //     message: "This route is not yet defined."
-  //   })
-  // },
-
+  getAllUsers: factory.getAll(User),
   // Do NOT update passwords with this!
+  getUser: factory.getOne(User),
   updateUser: factory.updateOne(User),
   deleteUser: factory.deleteOne(User),
 }

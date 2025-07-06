@@ -22,7 +22,12 @@ router
 router
   .route('/:id')
   .get(reviewController.getReview)
-  .patch(reviewController.updateReview)
+  .patch(
+    authController.protect,
+    reviewController.checkImmutableFields,
+    authController.restrictTo('admin', 'user'),
+    reviewController.checkReviewOwnership,
+    reviewController.updateReview)
   .delete(
     authController.protect,
     authController.restrictTo('admin'),

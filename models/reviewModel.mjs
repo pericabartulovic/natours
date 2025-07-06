@@ -19,13 +19,15 @@ const reviewSchema = new mongoose.Schema({
   {
     type: mongoose.Schema.ObjectId,
     ref: 'Tour',
-    required: [true, 'Review must belong to a tour.']
+    required: [true, 'Review must belong to a tour.'],
+    immutable: true,
   },
   user:
   {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
-    required: [true, 'Review must belong to a user']
+    required: [true, 'Review must belong to a user'],
+    immutable: true,
   },
 },
   {

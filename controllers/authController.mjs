@@ -37,7 +37,8 @@ const authController = {
     const newUser = await User.create({
       name: req.body.name,
       email: req.body.email,
-      role: req.body.role,
+      // role: req.body.role,  // 👈 this should NOT be allowed from the frontend
+      role: 'user',            // ✅ Force to 'user' always
       password: req.body.password,
       passwordConfirm: req.body.passwordConfirm,
       passwordChangedAt: req.body.passwordChangedAt,

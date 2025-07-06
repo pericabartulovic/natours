@@ -20,6 +20,9 @@ router.delete('/deleteMe', userController.deleteMe);
 
 router.use(authController.restrictTo('admin'));
 
+// Admin creates a user with any role
+router.post('/adminCreateUser', userController.createUser);
+
 router
   .route('/')
   .get(userController.getAllUsers);

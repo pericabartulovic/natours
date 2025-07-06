@@ -3,7 +3,7 @@ import AppError from '../utils/appError.mjs';
 import catchAsync from '../utils/catchAsync.mjs';
 import factory from './handlerFactory.mjs';
 
-const filterOjb = (obj, ...allowedFields) => {
+const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
   Object.keys(obj).forEach(el => {
     if (allowedFields.includes(el)) newObj[el] = obj[el];
@@ -28,7 +28,7 @@ const userController = {
     }
 
     // 2) Filter out unwanted fields name that are not allowed to be updated
-    const filteredBody = filterOjb(req.body, 'name', 'email');
+    const filteredBody = filterObj(req.body, 'name', 'email');
 
     // 3) Update user document
     const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {

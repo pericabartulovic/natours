@@ -30,7 +30,8 @@ const reviewController = {
 
     // Only allow if user is the review owner OR is an admin
     if (review.user.id !== req.user.id && req.user.role !== 'admin') {
-      return next(new AppError('You do not have permission to modify this review', 403));
+      const action = req.method === 'DELETE' ? 'delete' : 'modify';
+      return next(new AppError(`You do not have permission to ${action} this review`, 403));
     }
 
     next();

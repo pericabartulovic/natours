@@ -1,4 +1,5 @@
 import Tour from '../models/tourModel.mjs';
+import AppError from '../utils/appError.mjs';
 import catchAsync from '../utils/catchAsync.mjs';
 import factory from './handlerFactory.mjs';
 // import AppError from '../utils/appError.mjs';
@@ -90,6 +91,29 @@ const tourController = {
       status: 'success',
       data: plan,
     });
+  }),
+
+  // /tours-within/:distance/center/:latlng/unit/:unit
+  // // /tours-within/233/center/34.111745,-118.113491/unit/mi
+  getToursWithin: catchAsync(async (req, res, next) => {
+    const { distance, latlng, unit } = req.params;
+    const [lat, lng] = latlng.split(',');
+
+    const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1 // convert distance to radiants
+
+    if (!lat || !lng) {
+      next(new AppError('Please provide latitude and logitude in the format lat, lng.', 400));
+    }
+
+    const tours = await Tour.find({ startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } } });
+
+    res.status(200).json({
+      status: 'success',
+      results: tours.length,
+      data: {
+        data: tours,
+      }
+    })
   }),
 };
 

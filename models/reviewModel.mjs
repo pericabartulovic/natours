@@ -38,6 +38,8 @@ const reviewSchema = new mongoose.Schema({
   }
 );
 
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true }); // enforce that no combination of tour + user can occur more than once in the collection - only one review from user on tour
+
 reviewSchema.pre(/^find/, function (next) {
   //   // this
   //   //   .populate({          // this is over populate for app ux

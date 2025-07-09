@@ -16,6 +16,7 @@ const handlerFactory = {
       .paginate();
 
     // EXECUTE QUERY
+    // const docs = await features.mongoQuery.explain();
     const docs = await features.mongoQuery;
 
     // SEND RESPONSE

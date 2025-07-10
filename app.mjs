@@ -6,6 +6,7 @@ import sanitize from 'mongo-sanitize';
 import sanitizeHtml from 'sanitize-html';
 import hpp from 'hpp';
 import qs from 'qs';
+import cors from 'cors';
 
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -24,6 +25,13 @@ const app = express();
 //////////////// 1. GLOBAL MIDDLWARES ///////////////////
 // Set security HTTP headers
 app.use(helmet());         //always as first middleware
+
+app.use(
+  cors({
+    origin: process.env.CLIENT_ORIGIN, // Vite dev server
+    credentials: true, // if using cookies or auth headers
+  })
+);
 
 // Development logging
 if (process.env.NODE_ENV === 'development') {

@@ -3,7 +3,7 @@ import slugify from 'slugify';
 // import User from './userModel.mjs';
 // import validator from 'validator';
 
-const toursSchema = new mongoose.Schema({
+const tourSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'A tour must have a name'],
@@ -119,45 +119,45 @@ const toursSchema = new mongoose.Schema({
     id: false,
   });
 
-// toursSchema.index({ price: 1 })  // ascending; -1 descending
-toursSchema.index({ price: 1, ratingsAverage: -1 });
-toursSchema.index({ slug: 1 }, { unique: true });
-toursSchema.index({ startLocation: '2dsphere' })
+// tourSchema.index({ price: 1 })  // ascending; -1 descending
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 }, { unique: true });
+tourSchema.index({ startLocation: '2dsphere' })
 
-toursSchema.virtual('durationWeeks').get(function () {
+tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
 // Virtual populate
-toursSchema.virtual('reviews', {
+tourSchema.virtual('reviews', {
   ref: 'Review',
   foreignField: 'tour',
   localField: '_id'
 });
 
 // DOCUMENT MIDDLEWARE: runs before .save() and .create()
-toursSchema.pre('save', function (next) {
+tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true }); // -> 'this' points/refers to the DOCUMENT being saved and this is necessary when using a regular function is necessary when manipulating document
   next();
 });
 
-// toursSchema.post('save', (doc, next) => {
+// tourSchema.post('save', (doc, next) => {
 //   console.log(doc); // We're not using 'this', just doc, so an arrow function is perfectly fine here
 //   next();
 // });
 
 //QUERY MIDDLEWARE
-// toursSchema.pre('find', function (next) {
-toursSchema.pre(/^find/, function (next) {
+// tourSchema.pre('find', function (next) {
+tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } });  // 'this' points to QUERY
 
   this.start = Date.now();
   next();
 });
 
-toursSchema.pre(/^find/, function (next) {
+tourSchema.pre(/^find/, function (next) {
   // Embbeding user data into Tours
-  // toursSchema.pre('save', async function (next) {
+  // tourSchema.pre('save', async function (next) {
   //   const guidesPromises = this.guides.map(async id => await User.findById(id));
   //   this.guides = await Promise.all(guidesPromises);
   //   next();
@@ -170,18 +170,22 @@ toursSchema.pre(/^find/, function (next) {
   next();
 });
 
-toursSchema.post(/^find/, function (docs, next) {
+tourSchema.post(/^find/, function (docs, next) {
   console.log(`Query took ${Date.now() - this.start} milliseconds!`);
   next();
 });
 
 //AGGREGATION MIDDLEWARE
-/* toursSchema.pre('aggregate', function (next) {
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-  console.log(this); // -> 'this' points to current AGGREGATION OBJECT
+tourSchema.pre('aggregate', function (next) {
+  // Hide secret tours if geoNear is NOT used
+  if (!(this.pipeline().length > 0 && '$geoNear' in this.pipeline()[0])) {
+    this.pipeline().unshift({
+      $match: { secretTour: { $ne: true } }
+    });
+  }
   next();
-}); */
+});
 
-const Tour = mongoose.model('Tour', toursSchema);
+const Tour = mongoose.model('Tour', tourSchema);
 
 export default Tour;

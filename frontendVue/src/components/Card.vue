@@ -3,6 +3,7 @@
     <div class="card__header">
       <div class="card__picture">
         <div class="card__picture-overlay">&nbsp;</div>
+        <!-- <img class="card__picture-img" :src="`/img/tours/${tour.imageCover}`" :alt="tour.name" /> -->
         <img class="card__picture-img" :src="`http://localhost:3000/img/tours/${tour.imageCover}`" :alt="tour.name" />
       </div>
       <h3 class="heading-tertirary">
@@ -45,7 +46,7 @@
 
     <div class="card__footer">
       <p>
-        <span class="card__footer-value">${{ tour.price }}</span>
+        <span class="card__footer-value">{{ tour.price }}€&nbsp;</span>
         <span class="card__footer-text">per person</span>
       </p>
       <p class="card__ratings">

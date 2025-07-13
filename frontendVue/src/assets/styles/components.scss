@@ -1,4 +1,4 @@
-// BUTTON
+/////// BUTTON ///////
 .btn,
 .btn:link,
 .btn:visited {
@@ -123,5 +123,64 @@
     outline: none;
     outline: 3px solid #55c57a;
     outline-offset: 3px;
+  }
+}
+
+/////// OVERVIEW BOX ///////
+.overview-box {
+  background-color: #f7f7f7;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+
+  &__group {
+    &:not(:last-child) {
+      margin-bottom: 7rem;
+    }
+  }
+
+  &__detail {
+    font-size: 1.5rem;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    font-weight: 400;
+
+    svg {
+      margin-right: 1.25rem;
+    }
+
+    &:not(:last-child) {
+      margin-bottom: 2.25rem;
+    }
+  }
+
+  &__icon {
+    height: 2.25rem;
+    width: 2.25rem;
+    fill: #55c57a;
+  }
+
+  &__label {
+    font-weight: 700;
+    margin-right: 2.25rem;
+    text-transform: uppercase;
+    font-size: 1.4rem;
+  }
+
+  &__text {
+    text-transform: capitalize;
+  }
+
+  &__img {
+    border-radius: 50%;
+    height: 3.5rem;
+    margin-right: 1.25rem;
   }
 }

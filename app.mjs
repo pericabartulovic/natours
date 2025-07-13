@@ -23,6 +23,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 //////////////// 1. GLOBAL MIDDLWARES ///////////////////
+// Serving static files
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Set security HTTP headers
 app.use(helmet());         //always as first middleware
 
@@ -138,9 +141,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
-// Serving static files
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Test middleware - custom req attribute (here: requestTime)
 app.use((req, res, next) => {

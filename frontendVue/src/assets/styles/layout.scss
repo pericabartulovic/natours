@@ -102,10 +102,18 @@
 }
 
 .heading-primary {
-  font-size: 5rem;
+  font-size: 3rem;
   text-align: center;
-  width: 70%;
   margin: 0 auto;
+
+  @include respond(md) {
+    font-size: 5rem;
+  }
+
+  @include respond(lg) {
+    width: 70%;
+    font-size: 5rem;
+  }
 }
 
 .heading-tertirary {

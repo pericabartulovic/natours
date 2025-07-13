@@ -1,6 +1,13 @@
+import mongoose from 'mongoose';
 import catchAsync from "../utils/catchAsync.mjs";
 import AppError from "../utils/appError.mjs";
 import APIFeatures from "../utils/apiFeatures.mjs";
+
+// Utility to check if a string is a valid MongoDB ObjectId
+function isValidObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(id);
+}
+
 
 const handlerFactory = {
   getAll: Model => catchAsync(async (req, res, next) => {
@@ -48,12 +55,19 @@ const handlerFactory = {
   }),
 
   getOne: (Model, populateOptions) => catchAsync(async (req, res, next) => {
-    let query = Model.findById(req.params.id);
+    // let query = Model.findById(req.params.id);
+    let query;
+    if (isValidObjectId(req.params.id)) {
+      query = Model.findById(req.params.id);
+    } else {
+      query = Model.findOne({ slug: req.params.id });
+    }
+
     if (populateOptions) query = query.populate(populateOptions);
     const doc = await query;
 
     if (!doc) {
-      return next(new AppError('No document found with that ID', 404)); // return --> to exit func immediately and not to proceed to next line...
+      return next(new AppError('No document found with that ID or Name', 404)); // return --> to exit func immediately and not to proceed to next line...
     }
 
     res.status(200).json({

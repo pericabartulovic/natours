@@ -112,6 +112,7 @@ import { ref, computed, onMounted } from 'vue'
 import api from '../../api'
 import OverviewBox from '../OverviewBox.vue'
 import ReviewCard from '../ReviewCard.vue'
+import 'mapbox-gl/dist/mapbox-gl.css';
 import MapBoxMap from '../MapBoxMap.vue'
 
 const props = defineProps({ slug: String })

@@ -1,5 +1,7 @@
 <template>
   <main class="main">
+    <GlobalAlert v-if="alert" :message="alert.message" :type="alert.type" />
+    
     <div class="login-form">
       <h2 class="heading-secondary ma-bt-lg">Log into your account</h2>
       <form class="form form--login" @submit.prevent="onSubmit">
@@ -17,7 +19,7 @@
             {{ loading ? 'Logging in...' : 'Login' }}
           </button>
         </div>
-        <div v-if="error" class="form__error">{{ error }}</div>
+        <!-- <div v-if="error" class="form__error">{{ error }}</div> -->
       </form>
     </div>
   </main>
@@ -28,6 +30,7 @@ import { ref } from 'vue'
 import useAuthStore from '@/stores/auth'
 import api from '../../api'
 import { useRouter } from 'vue-router'
+import GlobalAlert from '@/components/GlobalAlert.vue' 
 
 const email = ref('')
 const password = ref('')
@@ -35,6 +38,7 @@ const loading = ref(false)
 const error = ref('')
 const router = useRouter()
 const auth = useAuthStore()
+const alert = ref(null)
 
 const onSubmit = async () => {
   loading.value = true
@@ -47,10 +51,13 @@ const onSubmit = async () => {
     auth.isLoggedIn = true
     auth.user = res.data.user
     
+    alert.value = { type: 'success', message: 'Login successful!' }
+    
     // Rredirect to home page
-    router.push('/tours')
+    setTimeout(() => router.push('/tours'), 1000)
+    
   } catch (err) {
-    error.value = err.response?.data?.message || 'Login failed. Please try again.'
+    alert.value = { type: 'error', message: err.response?.data?.message || 'Login failed. Please try again.' } // ✅ Correct
   } finally {
     loading.value = false
   }

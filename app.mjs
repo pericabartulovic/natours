@@ -7,6 +7,7 @@ import sanitizeHtml from 'sanitize-html';
 import hpp from 'hpp';
 import qs from 'qs';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -52,6 +53,7 @@ app.use('/api', limiter);
 
 // Body parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));
+app.use(cookieParser());
 
 // Secure query string parsing (prevents prototype pollution via query)
 app.set('query parser', str => qs.parse(str, { allowPrototypes: false }));
@@ -145,7 +147,7 @@ app.use((req, res, next) => {
 // Test middleware - custom req attribute (here: requestTime)
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  // console.log(req.headers);
+  // console.log(req.cookies);
   next();
 });
 

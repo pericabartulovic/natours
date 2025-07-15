@@ -5,30 +5,41 @@
     </div>
     <nav class="nav">
       <router-link to="/" class="nav__el">All tours</router-link>
-      <template v-if="user">
-        <router-link to="/me" class="nav__el">
-          <img :src="`/img/users/${user.photo}`" :alt="`Photo of ${user.name}`" class="nav__user-img" />
-          <span>{{ user.name.split(' ')[0] }}</span>
+      <template v-if="auth.isLoggedIn && auth.user">
+        <router-link to="/users/me" class="nav__el">
+          <!-- <img :src="`/img/users/${user.photo}`" :alt="`Photo of ${user.name}`" class="nav__user-img" /> -->
+          <img :src="`http://localhost:3000/img/users/${auth.user.photo}`" :alt="`Photo of ${auth.user.name}`"
+            class="nav__user-img" />
+          <span>{{ auth.user.name.split(' ')[0] }}</span>
         </router-link>
 
-
-        <button class="nav__el nav__el--logout" @click="handleLogout">Log out</button>
+        <button class="nav__el nav__el--logout" @click="handleLogout"> Log out</button>
       </template>
 
       <template v-else>
-        <router-link to="/login" class="nav__el">Log in</router-link>
-        <router-link to="/signup" class="nav__el nav__el--cta">Sign up</router-link>
+        <router-link to="/users/login" class="nav__el">Log in</router-link>
+        <router-link to="/users/signup" class="nav__el nav__el--cta">Sign up</router-link>
       </template>
     </nav>
   </header>
 </template>
 
 <script setup>
-const user = null // or use `ref()` or `inject()` if you're managing auth globally
+import useAuthStore from '@/stores/auth'
+import { useRouter } from 'vue-router'
+import api from '@/api'
 
-function handleLogout() {
-  // TODO: connect to logout logic or API
-  console.log('Logging out...')
+const auth = useAuthStore()
+const router = useRouter()
+
+async function handleLogout() {
+  try {
+    await api.get('/users/logout') // or POST if your API uses POST
+    auth.logout()
+    router.push('/tours')
+  } catch (err) {
+    console.error('Logout failed:', err)
+  }
 }
 </script>
 

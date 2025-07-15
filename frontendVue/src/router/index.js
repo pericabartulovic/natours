@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+// import useAuthStore from '@/stores/auth'
+
 import Overview from '../components/views/Overview.vue'
 import TourDetails from '../components/views/TourDetails.vue'
 import Login from '../components/views/Login.vue'
@@ -11,11 +13,11 @@ const routes = [
     path: '/tour/:slug',
     component: TourDetails,
     props: true,    //props: true in the route definition tells Vue Router to pass route params as props to the component.
-    meta: { title: 'Tour Details' }
+    meta: { title: 'Tour Details', scrollToTop: true }
   },
-  { path: '/login', component: Login },
-  { path: '/signup', component: Signup },
-  { path: '/me', component: Account },
+  { path: '/users/login', component: Login },
+  { path: '/users/signup', component: Signup },
+  { path: '/users/me', component: Account },
   { path: '/:pathMatch(.*)*', redirect: '/tours' }
 ]
 
@@ -23,6 +25,20 @@ const router = createRouter({
   history: createWebHistory(),
   routes
 });
+
+// router.beforeEach(async (to, from, next) => {
+//   const auth = useAuthStore()
+//   // Wait for auth check if not done yet
+//   if (!auth.checked) await auth.checkAuth()
+
+//   const publicPages = ['/users/login', '/users/signup', '/tours']
+//   const authRequired = !publicPages.includes(to.path)
+
+//   if (authRequired && !auth.isLoggedIn) {
+//     return next('/users/login')
+//   }
+//   next()
+// })
 
 // Set document title after each navigation
 /* eslint-env browser */

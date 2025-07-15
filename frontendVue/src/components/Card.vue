@@ -55,9 +55,9 @@
           rating ({{ tour.ratingsQuantity }})
         </span>
       </p>
-      <a class="btn btn--green btn--small" :href="`/tour/${tour.slug}`">
+      <router-link :to="`/tour/${tour.slug}`" class="btn btn--green btn--small">
         Details
-      </a>
+      </router-link>
     </div>
   </div>
 </template>

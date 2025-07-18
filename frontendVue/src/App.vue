@@ -1,17 +1,16 @@
 <template>
+  <GlobalAlert v-if="alert" :type="alert.type" :message="alert.message" />
   <Header />
   <router-view />
   <Footer />
 </template>
-<!-- <div>
-    <h1>Tours</h1>
-    <ul>
-      <li v-for="tour in tours" :key="tour.id">{{ tour.name }}</li>
-    </ul>
-  </div>
-</template> -->
 
 <script setup>
 import Header from './components/TheHeader.vue';
 import Footer from './components/TheFooter.vue';
+import GlobalAlert from './components/GlobalAlert.vue';
+import useAlertStore from './stores/alerts'
+import { storeToRefs } from 'pinia'
+
+const { alert } = storeToRefs(useAlertStore())
 </script>

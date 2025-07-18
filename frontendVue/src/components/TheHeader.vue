@@ -25,20 +25,23 @@
 </template>
 
 <script setup>
-import useAuthStore from '@/stores/auth'
-import { useRouter } from 'vue-router'
-import api from '@/api'
+import useAuthStore from '../stores/auth';
+import useAlertStore from '../stores/alerts';
+import { useRouter } from 'vue-router';
+import api from '@/api';
 
-const auth = useAuthStore()
-const router = useRouter()
+const auth = useAuthStore();
+const alertStore = useAlertStore();
+const router = useRouter();
 
 async function handleLogout() {
   try {
     await api.get('/users/logout') // or POST if your API uses POST
-    auth.logout()
+    auth.logout();
+    alertStore.showAlert('success', 'Logout successful!')
     router.push('/tours')
   } catch (err) {
-    console.error('Logout failed:', err)
+    alertStore.showAlert('error', err.response?.data?.message || 'Logout failed.');
   }
 }
 </script>

@@ -66,6 +66,14 @@ const authController = {
     createSendToken(user, 200, res);
   }),
 
+  logout: (req, res) => {
+    res.cookie('jwt', 'loggedout', {
+      expires: new Date(Date.now() + 10 * 1000),
+      httpOnly: true,
+    });
+    res.status(200).json({ status: 'success' });
+  },
+
   protect: catchAsync(async (req, res, next) => {
     // 1) Getting token and check of it's therr
     let token;

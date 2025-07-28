@@ -127,7 +127,7 @@ onMounted(async () => {
     tour.value = res.data.tour;
     document.title = `Natours | ${tour.value.name}`
   } catch (err) {
-    error.value = 'Failed to load tour details.'
+    error.value = err.response?.data?.message || 'Failed to load tour details.'
   } finally {
     loading.value = false
   }

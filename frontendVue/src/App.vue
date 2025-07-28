@@ -1,8 +1,10 @@
 <template>
-  <GlobalAlert v-if="alert" :type="alert.type" :message="alert.message" />
-  <Header />
-  <router-view />
-  <Footer />
+  <div class="layout">
+    <GlobalAlert v-if="alert" :type="alert.type" :message="alert.message" />
+    <Header />
+    <router-view />
+    <Footer />
+  </div>
 </template>
 
 <script setup>

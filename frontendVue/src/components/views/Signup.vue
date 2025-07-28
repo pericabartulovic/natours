@@ -15,12 +15,13 @@
 
         <div class="form__group">
           <label class="form__label" for="password">Password</label>
-          <input class="form__input" v-model="password" type="password" required minlength="8" />
+          <input class="form__input" v-model="password" type="password" placeholder="••••••••" required minlength="8" />
         </div>
 
         <div class="form__group">
           <label class="form__label" for="passwordConfirm">Confirm Password</label>
-          <input class="form__input" v-model="passwordConfirm" type="password" required minlength="8" />
+          <input class="form__input" v-model="passwordConfirm" type="password" placeholder="••••••••" required
+            minlength="8" />
         </div>
 
         <button class="btn btn--green" type="submit" :disabled="loading">

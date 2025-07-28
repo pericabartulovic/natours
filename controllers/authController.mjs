@@ -141,7 +141,11 @@ const authController = {
     await user.save({ validateBeforeSave: false });
 
     // 3) Send it to user's email
-    const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
+    const host = process.env.NODE_ENV === 'development' ? process.env.DEVELOPMENT_BASE_URL : process.env.PRODUCTION_BASE_URL
+    // const resetURL = `${req.protocol}://${host}/api/v1/users/resetPassword/${resetToken}`
+    const resetURL = `${req.protocol}://${host}/users/resetPassword/${resetToken}`
+
+    // const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
     const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}
                     \nIf you didn't forget your password, please ignore this email!`;
 

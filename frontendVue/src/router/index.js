@@ -6,6 +6,8 @@ import TourDetails from '../components/views/TourDetails.vue'
 import Login from '../components/views/Login.vue'
 import Signup from '../components/views/Signup.vue'
 import Account from '../components/views/Account.vue'
+import ForgotPassword from '../components/views/forgotPassword/ForgotPassword.vue'
+import ResetPassword from '../components/views/forgotPassword/ResetPassword.vue'
 
 const routes = [
   { path: '/tours', component: Overview },
@@ -18,6 +20,9 @@ const routes = [
   { path: '/users/login', component: Login },
   { path: '/users/signup', component: Signup },
   { path: '/users/me', component: Account },
+  { path: '/users/forgotPassword', component: ForgotPassword },
+  { path: '/users/resetPassword/:token', component: ResetPassword },
+
   { path: '/:pathMatch(.*)*', redirect: '/tours' }
 ]
 

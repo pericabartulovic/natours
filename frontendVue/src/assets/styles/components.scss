@@ -292,6 +292,12 @@
   }
 }
 
+.form__group--actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
 .form__error {
   color: #c00;
   margin-top: 1rem;

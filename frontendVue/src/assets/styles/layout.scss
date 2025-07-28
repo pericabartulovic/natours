@@ -1,5 +1,11 @@
 @use "@/assets/styles/mixins"as *;
 
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 .main {
   background-color: #f7f7f7;
   padding: 4rem 2rem;
@@ -38,6 +44,10 @@
 
 .ma-bt-lg {
   margin-bottom: 3.5rem !important;
+}
+
+.ma-bt-xl {
+  margin-bottom: 4.5rem !important;
 }
 
 .right {

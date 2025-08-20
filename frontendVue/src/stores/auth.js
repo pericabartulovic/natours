@@ -5,7 +5,7 @@ const useAuthStore = defineStore('auth', {
   state: () => ({
     isLoggedIn: false,
     user: null,
-    checked: false // To avoid double API calls
+    checked: false // To avoid double API calls -> see routes/index.js
   }),
   actions: {
     async checkAuth() {

@@ -16,7 +16,6 @@
         <div class="form__group form__group--actions">
           <button class="btn btn--green" type="submit" :disabled="loading">
             {{ loading ? 'Reseting...' : 'Reset' }}
-
           </button>
         </div>
       </form>

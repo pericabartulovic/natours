@@ -34,11 +34,17 @@ const createSendToken = (user, statusCode, res) => {
 
 const authController = {
   signup: catchAsync(async (req, res, next) => {
+    const user = await User.findOne({ email: req.body.email });
+    if (user) {
+      return next(new AppError('There is already registered user with that email address. Use unique email!', 404));
+    }
+
     const newUser = await User.create({
       name: req.body.name,
       email: req.body.email,
       // role: req.body.role,  // 👈 this should NOT be allowed from the frontend
       role: 'user',            // ✅ Force to 'user' always
+      photo: 'favicon.png',
       password: req.body.password,
       passwordConfirm: req.body.passwordConfirm,
       passwordChangedAt: req.body.passwordChangedAt,
@@ -75,7 +81,7 @@ const authController = {
   },
 
   protect: catchAsync(async (req, res, next) => {
-    // 1) Getting token and check of it's therr
+    // 1) Getting token and check of it's there
     let token;
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
@@ -108,7 +114,7 @@ const authController = {
     // 3) Check if user still exists
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
-      return next(new AppError('The user beloging to this token does not exist.', 401));
+      return next(new AppError('The user belonging to this token does not exist.', 401));
     }
 
     // 4) Check if user changed password after the token was issued

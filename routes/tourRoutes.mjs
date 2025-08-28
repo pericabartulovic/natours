@@ -5,7 +5,7 @@ import reviewRouter from './reviewRoutes.mjs';
 
 const router = express.Router();
 /*
-  for optional paramater we add ? eg. '/api/v1/tours/:id/x?' 
+  for optional parameter we add ? eg. '/api/v1/tours/:id/x?' 
   then on request to '/api/v1/tours/5' /x is ommited - cl would return: { id: 5, x: undefined}
 */
 ///////////// NESTED ROUTES IN EXPRESS //////

@@ -37,7 +37,7 @@ const reviewController = {
     next();
   }),
 
-  getAllreviews: factory.getAll(Review),
+  getAllReviews: factory.getAll(Review),
   createReview: factory.createOne(Review),
   getReview: factory.getOne(Review),
   updateReview: factory.updateOne(Review),

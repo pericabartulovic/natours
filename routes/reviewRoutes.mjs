@@ -11,7 +11,7 @@ const router = express.Router({ mergeParams: true });  // by default each router
 
 router
   .route('/')
-  .get(reviewController.getAllreviews)
+  .get(reviewController.getAllReviews)
   .post(
     authController.protect,
     authController.restrictTo('user'),

@@ -31,6 +31,13 @@ const userController = {
     const filteredBody = filterObj(req.body, 'name', 'email');
 
     // 3) Update user document
+    if (req.body.email && req.body.email !== req.user.email) {
+      const existing = await User.findOne({ email: req.body.email });
+      if (existing) {
+        return next(new AppError('Email already in use. Please use another.', 400));
+      }
+    }
+
     const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
       new: true,
       runValidators: true

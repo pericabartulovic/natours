@@ -55,7 +55,7 @@ const userController = {
     await User.findByIdAndUpdate(req.user.id, { active: false });
 
     res.status(204).json({
-      staus: 'success',
+      status: 'success',
       data: null,
     });
   }),

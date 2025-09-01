@@ -1,10 +1,79 @@
+import multer from 'multer';
+import sharp from 'sharp';
 import Tour from '../models/tourModel.mjs';
 import AppError from '../utils/appError.mjs';
 import catchAsync from '../utils/catchAsync.mjs';
 import factory from './handlerFactory.mjs';
 // import AppError from '../utils/appError.mjs';
 
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image. Please upload only images', 400), false)
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
+
 const tourController = {
+  resizeTourImages: catchAsync(async (req, res, next) => {
+    if (!req.files.imageCover || !req.files.images) return next();
+
+    //Cover image
+    req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpeg`
+    await sharp(req.files.imageCover[0].buffer)
+      .resize(2000, 1333)
+      .toFormat('jpeg')
+      .jpeg({ quality: 90 })
+      .toFile(`public/img/tours/${req.body.imageCover}`);
+
+    // Images
+    req.body.images = [];
+
+    await Promise.all(
+      req.files.images.map(async (file, i) => {                        // not forEach (it doesn't prevent next() execution, map stores array of promises and loops until finish, then next())
+        const fileName = `tour-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
+
+        await sharp(file.buffer)
+          .resize(2000, 1333)
+          .toFormat('jpeg')
+          .jpeg({ quality: 90 })
+          .toFile(`public/img/tours/${fileName}`);
+
+        req.body.images.push(fileName);
+      })
+    );
+
+    console.log(req.body);
+
+    next();
+  }),
+
+  // In case we have only multiple images or files:
+  // uploadTourImages: upload.array('images', 5), req.files
+  // Single:
+  // uploadTourImage: upload.single('image'), req.file
+
+  //Mix:
+  uploadTourImages: upload.fields([
+    {
+      name: 'imageCover',
+      maxCount: 1
+    },
+    {
+      name: 'images',
+      maxCount: 3
+    }
+  ]),
+
+
   aliasTopTours: (req, res, next) => {                                      // prefilling query string (for user, so he doesn't need to)
     // req.query.sort = '-ratingsAverage,price';                            // for older versions of Express where queries were parsed
     // req.query.fields = 'ratingsAverage,price,name,difficulty,summary';   // for older versions of Express where queries were parsed

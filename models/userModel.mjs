@@ -16,7 +16,10 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     validate: [validator.isEmail, 'Please, provide a valid email']
   },
-  photo: String,
+  photo: {
+    type: String,
+    default: 'default.jpg'
+  },
   role: {
     type: String,
     enum: ['user', 'guide', 'lead', 'lead-guide', 'admin'],
@@ -51,7 +54,7 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre('save', async function (next) {
-  // Only run this function if password was acttually modified
+  // Only run this function if password was actually modified
   if (!this.isModified('password')) return next();
 
   // Hash the password with cost of 12

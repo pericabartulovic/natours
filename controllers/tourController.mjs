@@ -51,8 +51,6 @@ const tourController = {
       })
     );
 
-    console.log(req.body);
-
     next();
   }),
 

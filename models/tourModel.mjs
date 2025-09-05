@@ -105,7 +105,7 @@ const tourSchema = new mongoose.Schema({
       day: Number,
     }
   ],
-  // guides: Array, // array of ids for embbeding -> see: tourSchema.pre('save',....)
+  // guides: Array, // array of ids for embedding -> see: tourSchema.pre('save',....)
   guides: [
     {
       type: mongoose.Schema.ObjectId,

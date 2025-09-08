@@ -4,7 +4,6 @@ import Tour from '../models/tourModel.mjs';
 import AppError from '../utils/appError.mjs';
 import catchAsync from '../utils/catchAsync.mjs';
 import factory from './handlerFactory.mjs';
-// import AppError from '../utils/appError.mjs';
 
 const multerStorage = multer.memoryStorage();
 
@@ -169,7 +168,7 @@ const tourController = {
     const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1 // convert distance to radiants
 
     if (!lat || !lng) {
-      next(new AppError('Please provide latitude and logitude in the format lat, lng.', 400));
+      next(new AppError('Please provide latitude and longitude in the format lat, lng.', 400));
     };
 
     const tours = await Tour.find({ startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } } });
@@ -190,7 +189,7 @@ const tourController = {
     const multiplier = unit === 'mi' ? 0.000621371 : 0.001;
 
     if (!lat || !lng) {
-      next(new AppError('Please provide latitude and logitude in the format lat, lng.', 400));
+      next(new AppError('Please provide latitude and longitude in the format lat, lng.', 400));
     };
 
     const distances = await Tour.aggregate([

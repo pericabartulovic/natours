@@ -113,6 +113,17 @@ const userController = {
     })
   },
 
+  getGuides: catchAsync(async (req, res) => {
+    const guides = await User.find({
+      $or: [{ role: 'guide' }, { role: 'lead-guide' }, { role: 'lead' }]
+    });
+
+    res.status(200).json({
+      status: 'success',
+      guides
+    });
+  }),
+
   getAllUsers: factory.getAll(User),
   // Do NOT update passwords with this!
   getUser: factory.getOne(User),

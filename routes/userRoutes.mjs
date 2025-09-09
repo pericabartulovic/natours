@@ -29,9 +29,14 @@ router
 // .post(userController.createUser);   // for this we have auth controller and sign up logic
 
 router
+  .route('/guides')
+  .get(userController.getGuides)
+
+router
   .route('/:id')
   .get(userController.getUser)
   .patch(userController.updateUser)
   .delete(userController.deleteUser);
+
 
 export default router;

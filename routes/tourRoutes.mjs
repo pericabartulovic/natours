@@ -60,8 +60,15 @@ router
     authController.restrictTo('admin', 'lead-guide'),
     tourController.uploadTourImages,
     tourController.resizeTourImages,
-    tourController.updateTour
+    tourController.updateTourData
   )
+  // .put(
+  //   authController.protect,
+  //   authController.restrictTo('admin', 'lead-guide'),
+  //   tourController.uploadTourImages,
+  //   tourController.resizeTourImages,
+  //   tourController.updateTourData
+  // )
   .delete(
     authController.protect,
     authController.restrictTo('admin', 'lead-guide'),

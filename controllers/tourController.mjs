@@ -25,6 +25,21 @@ const tourController = {
   resizeTourImages: catchAsync(async (req, res, next) => {
     if (!req.files) return next();
 
+    let imagesIndexes = [];
+    try {
+      imagesIndexes = req.body.imagesIndexes ? JSON.parse(req.body.imagesIndexes) : [];
+    } catch (err) {
+      imagesIndexes = [];
+    }
+
+    // Remove imagesIndexes from req.body so it doesn't overwrite the tour document
+    delete req.body.imagesIndexes;
+
+    // Retrieve existing tour document early to access old images
+    const doc = await Tour.findById(req.params.id);
+    if (!doc) return next(new AppError('No document found with that ID', 404));
+    const oldImages = Array.isArray(doc.images) ? doc.images : [];
+
     if (req.files.imageCover) {
       req.body.imageCover = `tour-${req.params.id ? `${req.params.id}-` : ''}${Date.now()}-cover.jpeg`;
 
@@ -36,11 +51,19 @@ const tourController = {
     }
 
     if (req.files.images) {
-      req.body.images = [];
+      req.body.images = Array(3).fill('');
 
+      // Assign uploaded files to correct slots using imagesIndexes mapping
       await Promise.all(
-        req.files.images.map(async (file, i) => {
-          const fileName = `tour-${req.params.id || Date.now()}-${i + 1}.jpeg`;
+        req.files.images.map(async (file, idx) => {
+          const slotIndex = imagesIndexes[idx];
+
+          if (typeof slotIndex !== 'number' || slotIndex < 0 || slotIndex >= 3) {
+            // Ignore if invalid index
+            return;
+          }
+
+          const fileName = `tour-${req.params.id || Date.now()}-${slotIndex + 1}.jpeg`;
 
           await sharp(file.buffer)
             .resize(2000, 1333)
@@ -48,9 +71,16 @@ const tourController = {
             .jpeg({ quality: 90 })
             .toFile(`public/img/tours/${fileName}`);
 
-          req.body.images.push(fileName);
+          req.body.images[slotIndex] = fileName;
         })
       );
+
+      // Preserve old filenames for slots without new upload
+      for (let i = 0; i < 3; i += 1) {
+        if (!req.body.images[i]) {
+          req.body.images[i] = oldImages[i] || '';
+        }
+      }
     }
 
     next();
@@ -73,6 +103,40 @@ const tourController = {
     }
   ]),
 
+  updateTourData: catchAsync(async (req, res, next) => {
+    const doc = await Tour.findById(req.params.id);
+    if (!doc) return next(new AppError('No document found with that ID', 404));
+
+    const existingImages = Array.isArray(doc.images) ? doc.images : [];
+    let incomingImages = req.body.images;
+    // Normalize
+    if (!Array.isArray(incomingImages)) incomingImages = [incomingImages];
+    while (incomingImages.length < 3) incomingImages.push('');
+
+    // Build merged array
+    const mergedImages = incomingImages.map((img, idx) => {
+      if (img && img.endsWith('.jpeg')) {
+        // New upload or re-send of existing string filename
+        return img;
+      }
+      if (!img || img === '') {
+        // Nothing sent for this slot; keep original image (preserve)
+        return existingImages[idx] || '';
+      }
+      // Defensive fallback
+      return '';
+    });
+
+    doc.images = mergedImages;
+    doc.set(req.body); // update other fields too
+    await doc.save();
+
+    res.status(200).json({
+      status: 'success',
+      tour: doc,
+    });
+  }),
+
 
   aliasTopTours: (req, res, next) => {                                      // prefilling query string (for user, so he doesn't need to)
     // req.query.sort = '-ratingsAverage,price';                            // for older versions of Express where queries were parsed
@@ -86,7 +150,7 @@ const tourController = {
   getAllTours: factory.getAll(Tour),
   getTour: factory.getOne(Tour, { path: 'reviews' }),
   createTour: factory.createOne(Tour),
-  updateTour: factory.updateOne(Tour),
+  // updateTour will be assigned after tourController is defined
   deleteTour: factory.deleteOne(Tour),
 
   getTourStats: catchAsync(async (req, res, next) => {
@@ -222,5 +286,8 @@ const tourController = {
     });
   }),
 };
+
+// Assign updateTour after tourController is defined to avoid reference error
+tourController.updateTour = tourController.updateTourData;
 
 export default tourController;

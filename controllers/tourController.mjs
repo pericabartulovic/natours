@@ -22,6 +22,8 @@ const upload = multer({
 });
 
 const tourController = {
+  totalSlots: 3, // TODO: refactor to CONSTANTS
+
   resizeTourImages: catchAsync(async (req, res, next) => {
     if (!req.files) return next();
 
@@ -32,7 +34,7 @@ const tourController = {
       imagesIndexes = [];
     }
 
-    // Remove imagesIndexes from req.body so it doesn't overwrite the tour document
+    // Remove imagesIndexes from req.body!! so it doesn't overwrite the tour document
     delete req.body.imagesIndexes;
 
     // Retrieve existing tour document early to access old images
@@ -51,15 +53,14 @@ const tourController = {
     }
 
     if (req.files.images) {
-      req.body.images = Array(3).fill('');
+      req.body.images = Array(tourController.totalSlots).fill('');
 
       // Assign uploaded files to correct slots using imagesIndexes mapping
       await Promise.all(
         req.files.images.map(async (file, idx) => {
           const slotIndex = imagesIndexes[idx];
 
-          if (typeof slotIndex !== 'number' || slotIndex < 0 || slotIndex >= 3) {
-            // Ignore if invalid index
+          if (typeof slotIndex !== 'number' || slotIndex < 0 || slotIndex >= tourController.totalSlots) {
             return;
           }
 
@@ -76,7 +77,7 @@ const tourController = {
       );
 
       // Preserve old filenames for slots without new upload
-      for (let i = 0; i < 3; i += 1) {
+      for (let i = 0; i < tourController.totalSlots; i += 1) {
         if (!req.body.images[i]) {
           req.body.images[i] = oldImages[i] || '';
         }
@@ -111,19 +112,16 @@ const tourController = {
     let incomingImages = req.body.images;
     // Normalize
     if (!Array.isArray(incomingImages)) incomingImages = [incomingImages];
-    while (incomingImages.length < 3) incomingImages.push('');
+    while (incomingImages.length < tourController.totalSlots) incomingImages.push('');
 
     // Build merged array
     const mergedImages = incomingImages.map((img, idx) => {
       if (img && img.endsWith('.jpeg')) {
-        // New upload or re-send of existing string filename
         return img;
       }
       if (!img || img === '') {
-        // Nothing sent for this slot; keep original image (preserve)
         return existingImages[idx] || '';
       }
-      // Defensive fallback
       return '';
     });
 

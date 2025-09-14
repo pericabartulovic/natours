@@ -34,14 +34,21 @@ const tourController = {
       imagesIndexes = [];
     }
 
-    // Remove imagesIndexes from req.body!! so it doesn't overwrite the tour document
+    // Remove imagesIndexes from req.body!! so it doesn't overwrite the tour document fields
     delete req.body.imagesIndexes;
 
-    // Retrieve existing tour document early to access old images
-    const doc = await Tour.findById(req.params.id);
-    if (!doc) return next(new AppError('No document found with that ID', 404));
-    const oldImages = Array.isArray(doc.images) ? doc.images : [];
 
+    // Local variable for oldImages per request to avoid race conditions on concurrent requests
+    let oldImages = [];
+
+    // Retrieve existing tour document early to access old images for update scenario
+    if (req.params.id) {
+      const doc = await Tour.findById(req.params.id);
+      if (!doc) return next(new AppError('No tour found with that ID', 404));
+      oldImages = Array.isArray(doc.images) ? doc.images : [];
+    }
+
+    // Process Image Cover separately
     if (req.files.imageCover) {
       req.body.imageCover = `tour-${req.params.id ? `${req.params.id}-` : ''}${Date.now()}-cover.jpeg`;
 
@@ -52,17 +59,20 @@ const tourController = {
         .toFile(`public/img/tours/${req.body.imageCover}`);
     }
 
+    // Process gallery images array
     if (req.files.images) {
-      req.body.images = Array(tourController.totalSlots).fill('');
+      if (req.params.id) {
+        // On update: initialize with empty slots for merging
+        req.body.images = Array(tourController.totalSlots).fill('');
+      } else {
+        // On create: start with empty array, push file names as we process files
+        req.body.images = [];
+      }
 
-      // Assign uploaded files to correct slots using imagesIndexes mapping
       await Promise.all(
         req.files.images.map(async (file, idx) => {
-          const slotIndex = imagesIndexes[idx];
-
-          if (typeof slotIndex !== 'number' || slotIndex < 0 || slotIndex >= tourController.totalSlots) {
-            return;
-          }
+          // Use imagesIndexes if provided, else use index order
+          const slotIndex = (imagesIndexes.length > 0) ? imagesIndexes[idx] : idx;
 
           const fileName = `tour-${req.params.id || Date.now()}-${slotIndex + 1}.jpeg`;
 
@@ -72,14 +82,22 @@ const tourController = {
             .jpeg({ quality: 90 })
             .toFile(`public/img/tours/${fileName}`);
 
-          req.body.images[slotIndex] = fileName;
-        })
+          if (req.params.id) {
+            // Assign into proper slot for update
+            req.body.images[slotIndex] = fileName;
+          } else {
+            // Push sequentially for create
+            req.body.images.push(fileName);
+          }
+        }),
       );
 
-      // Preserve old filenames for slots without new upload
-      for (let i = 0; i < tourController.totalSlots; i += 1) {
-        if (!req.body.images[i]) {
-          req.body.images[i] = oldImages[i] || '';
+      // For update: preserve old images where no new upload
+      if (req.params.id) {
+        for (let i = 0; i < tourController.totalSlots; i += 1) {
+          if (!req.body.images[i]) {
+            req.body.images[i] = oldImages[i] || '';
+          }
         }
       }
     }

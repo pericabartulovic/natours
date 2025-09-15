@@ -74,7 +74,7 @@ const tourController = {
           // Use imagesIndexes if provided, else use index order
           const slotIndex = (imagesIndexes.length > 0) ? imagesIndexes[idx] : idx;
 
-          const fileName = `tour-${req.params.id || Date.now()}-${slotIndex + 1}.jpeg`;
+          const fileName = `tour-${req.params.id ? `${req.params.id}-` : ''}${Date.now()}-${slotIndex + 1}.jpeg`;
 
           await sharp(file.buffer)
             .resize(2000, 1333)

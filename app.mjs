@@ -32,8 +32,9 @@ app.use(helmet());         //always as first middleware
 
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN, // Vite dev server
+    origin: process.env.CLIENT_ORIGIN, // dev server
     credentials: true, // if using cookies or auth headers
+    optionSuccessStatus: 200
   })
 );
 
@@ -53,6 +54,7 @@ app.use('/api', limiter);
 
 // Body parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // Secure query string parsing (prevents prototype pollution via query)

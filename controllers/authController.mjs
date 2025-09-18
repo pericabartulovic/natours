@@ -5,7 +5,7 @@ import crypto from 'crypto';
 import User from "../models/userModel.mjs";
 import catchAsync from "../utils/catchAsync.mjs";
 import AppError from '../utils/appError.mjs';
-import sendEmail from '../utils/email.mjs';
+import Email from '../utils/email.mjs';
 
 const signToken = id => jwt.sign({ id }, process.env.JWT_SECRET, {
   expiresIn: process.env.JWT_EXPIRES_IN,
@@ -48,6 +48,10 @@ const authController = {
       passwordConfirm: req.body.passwordConfirm,
       passwordChangedAt: req.body.passwordChangedAt,
     });
+
+    // const url = `${req.protocol}://${req.host}/users/me`; //monolithic - frontend and backend share the same domain
+    const url = `${process.env.CLIENT_ORIGIN}/users/me`;
+    await new Email(newUser, url).sendWelcome();
 
     createSendToken(newUser, 201, res);
   }),
@@ -148,18 +152,11 @@ const authController = {
     // 3) Send it to user's email
     const host = process.env.NODE_ENV === 'development' ? process.env.DEVELOPMENT_BASE_URL : process.env.PRODUCTION_BASE_URL
     // const resetURL = `${req.protocol}://${host}/api/v1/users/resetPassword/${resetToken}`
-    const resetURL = `${req.protocol}://${host}/users/resetPassword/${resetToken}`
-
     // const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
-    const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}
-                    \nIf you didn't forget your password, please ignore this email!`;
+    const resetURL = `${req.protocol}://${host}/users/resetPassword/${resetToken}`;
 
     try {
-      await sendEmail({
-        email: user.email,
-        subject: 'Your password reset token (valid for 10 min)',
-        message,
-      })
+      await new Email(user, resetURL).sendPasswordReset(resetURL);
 
       res.status(200).json({
         status: 'success',

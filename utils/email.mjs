@@ -18,8 +18,14 @@ class Email {
 
   newTransport() {
     if (process.env.NODE_ENV === "production") {
-      // TODO: plug in real production email service (e.g. SendGrid, Postmark, SES)
-      return 1;
+      // Sendgrid
+      return nodemailer.createTransport({
+        service: 'SendGrid',
+        auth: {
+          user: process.env.SENDGRID_USERNAME,
+          pass: process.env.SENDGRID_PASSWORD
+        }
+      })
     }
 
     // Dev: Mailtrap or local SMTP

@@ -29,7 +29,7 @@ const bookingController = {
               name: `${tour.name} Tour`,
               description: tour.summary,
               images: [
-                `https://yourdomain.com/img/tours/${tour.imageCover}`,
+                `https://mydomain.com/img/tours/${tour.imageCover}`,
               ],
             },
           },
@@ -40,7 +40,8 @@ const bookingController = {
 
     res.status(200).json({
       status: 'success',
-      session,
+      id: session.id,
+      url: session.url
     });
   }),
 };

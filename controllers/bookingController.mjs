@@ -9,9 +9,9 @@ const bookingController = {
   createCheckoutSession: catchAsync(async (req, res, next) => {
     const tour = await Tour.findById(req.params.tourId);
 
-    // if (!tour) {
-    //   return next(new AppError('There is no tour with that ID', 404));
-    // }
+    if (!tour) {
+      return next(new AppError('There is no tour with that ID', 404));
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],

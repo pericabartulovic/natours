@@ -1,9 +1,11 @@
 import multer from 'multer';
 import sharp from 'sharp';
 import User from '../models/userModel.mjs';
+import Booking from '../models/bookingModel.mjs';
 import AppError from '../utils/appError.mjs';
 import catchAsync from '../utils/catchAsync.mjs';
 import factory from './handlerFactory.mjs';
+import Tour from '../models/tourModel.mjs';
 
 // const multerStorage = multer.diskStorage({
 //   destination: (req, res, cb) => {
@@ -122,6 +124,17 @@ const userController = {
       status: 'success',
       guides
     });
+  }),
+
+  getMyTours: catchAsync(async (req, res, next) => {
+    const bookings = await Booking.find({ user: req.user.id });
+    const tourIDs = bookings.map(t => t.tour);
+    const tours = await Tour.find({ _id: { $in: tourIDs } });
+
+    res.status(200).json({
+      status: 'success',
+      tours
+    })
   }),
 
   getAllUsers: factory.getAll(User),

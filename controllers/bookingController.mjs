@@ -16,6 +16,8 @@ const bookingController = {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
+      // ⚠️ NOTE: In course, a temporary hack with query strings is used to create bookings after checkout.
+      // Skipping that here — will implement proper booking creation using Stripe Webhooks once deployed.
       success_url: `${req.protocol}://${req.get('host')}/`,
       cancel_url: `${req.protocol}://${req.get('host')}/tour/${tour.slug}`,
       customer_email: req.user.email,

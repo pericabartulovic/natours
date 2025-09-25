@@ -1,11 +1,15 @@
 import Stripe from 'stripe';
+import Booking from '../models/bookingModel.mjs';
 import Tour from '../models/tourModel.mjs';
 import AppError from '../utils/appError.mjs';
 import catchAsync from '../utils/catchAsync.mjs';
+import handlerFactory from './handlerFactory.mjs';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const bookingController = {
+  createBooking: handlerFactory.createOne(Booking),
+
   createCheckoutSession: catchAsync(async (req, res, next) => {
     const tour = await Tour.findById(req.params.tourId);
 

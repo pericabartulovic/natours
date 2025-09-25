@@ -4,6 +4,8 @@ import authController from '../controllers/authController.mjs';
 
 const router = express.Router();
 
+router.post('/', authController.protect, bookingController.createBooking)
+
 router
   .post(
     '/checkout-session/:tourId',

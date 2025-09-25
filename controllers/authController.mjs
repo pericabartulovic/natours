@@ -112,7 +112,7 @@ const authController = {
       });
      */
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-    console.log(decoded);
+    // console.log('decoded', decoded);
 
     // 3) Check if user still exists
     const currentUser = await User.findById(decoded.id);

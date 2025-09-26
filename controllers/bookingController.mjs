@@ -9,6 +9,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const bookingController = {
   createBooking: handlerFactory.createOne(Booking),
+  getAllBookings: handlerFactory.getAll(Booking),
+  getBookingById: handlerFactory.getOne(Booking),
+  updateBooking: handlerFactory.updateOne(Booking),
+  deleteBooking: handlerFactory.deleteOne(Booking),
 
   createCheckoutSession: catchAsync(async (req, res, next) => {
     const tour = await Tour.findById(req.params.tourId);

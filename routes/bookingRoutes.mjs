@@ -4,26 +4,28 @@ import authController from '../controllers/authController.mjs';
 
 const router = express.Router();
 
-router
-  .route('/')
-  .get(authController.protect, authController.restrictTo('admin', 'lead-guide', 'guide'), bookingController.getAllBookings)
-  .post(authController.protect, bookingController.createBooking)
-
-router
-  .route('/:id')
-  .get(authController.protect, bookingController.getBookingById)
-  .patch(authController.protect, authController.restrictTo('admin', 'lead-guide', 'guide'), bookingController.updateBooking)
-  .delete(
-    authController.protect,
-    authController.restrictTo('admin', 'lead-guide'),
-    bookingController.deleteBooking
-  );
+router.use(authController.protect)
 
 router
   .post(
     '/checkout-session/:tourId',
-    authController.protect,
     bookingController.createCheckoutSession
   )
+
+router.use(authController.restrictTo('admin', 'lead-guide'))
+
+router
+  .route('/')
+  .get(bookingController.getAllBookings)
+  .post(bookingController.createBooking)
+
+router
+  .route('/:id')
+  .get(bookingController.getBookingById)
+  .patch(bookingController.updateBooking)
+  .delete(
+    authController.restrictTo('admin', 'lead-guide'),
+    bookingController.deleteBooking
+  );
 
 export default router;

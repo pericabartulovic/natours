@@ -8,6 +8,7 @@ import hpp from 'hpp';
 import qs from 'qs';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import compression from 'compression';
 
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -146,6 +147,8 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+app.use(compression());
 
 // Test middleware - custom req attribute (here: requestTime)
 app.use((req, res, next) => {

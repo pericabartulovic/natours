@@ -4,7 +4,8 @@
   "description": "learning node, express and mongoDB",
   "main": "app.mjs",
   "scripts": {
-    "start": "cross-env NODE_ENV=development nodemon server.mjs",
+    "start": "node server.mjs",
+    "dev": "cross-env NODE_ENV=development nodemon server.mjs",
     "start:prod": "cross-env NODE_ENV=production nodemon server.mjs",
     "debug": "node --inspect-brk ./server.mjs"
   },
@@ -47,5 +48,8 @@
     "eslint-plugin-prettier": "^5.4.0",
     "eslint-plugin-react": "^7.37.5",
     "prettier": "^3.5.3"
+  },
+  "engines": {
+    "node": "22.x"
   }
 }

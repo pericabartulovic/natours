@@ -32,15 +32,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Set security HTTP headers
 app.use(helmet());         //always as first middleware
 
-app.use(
-  cors({
-    origin: [process.env.CLIENT_ORIGIN,
+app.options('*', cors({
+  origin: [
+    process.env.CLIENT_ORIGIN,
     process.env.DEVELOPMENT_BASE_URL,
-      'http://localhost:4200'],  // dev server
-    credentials: true, // if using cookies or auth headers
-    optionSuccessStatus: 200
-  })
-);
+    'http://localhost:4200',
+  ],
+  credentials: true
+}));
 
 // Development logging
 if (process.env.NODE_ENV === 'development') {

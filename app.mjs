@@ -47,7 +47,7 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// 👇 Trust the proxy (Render sets X-Forwarded-For)
+// Trust the proxy (Render sets X-Forwarded-For)
 app.set('trust proxy', 1);
 
 // Limit requests from same IP

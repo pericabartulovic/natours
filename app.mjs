@@ -34,7 +34,9 @@ app.use(helmet());         //always as first middleware
 
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN, // dev server
+    origin: [process.env.CLIENT_ORIGIN,
+    process.env.DEVELOPMENT_BASE_URL,
+      'http://localhost:4200'],  // dev server
     credentials: true, // if using cookies or auth headers
     optionSuccessStatus: 200
   })

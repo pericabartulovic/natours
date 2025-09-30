@@ -56,7 +56,7 @@ const bookingController = {
 
   createBookingCheckout: async session => {
     const tourId = session.client_reference_id;
-    const user = (await User.findOne({ email: session.customer_email }))?.id;
+    const user = (await User.findOne({ email: session.customer_email })).id;
     const price = session.line_items.data[0].amount_total / 100;
 
     if (tourId && user) {

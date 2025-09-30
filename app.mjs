@@ -33,7 +33,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Set security HTTP headers
 app.use(helmet());         //always as first middleware
 
-app.options('*', cors({
+app.use(cors({
   origin: [
     process.env.CLIENT_ORIGIN,
     process.env.DEVELOPMENT_BASE_URL,
@@ -170,8 +170,7 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/bookings', bookingRouter);
 
-app.all('/{*any}', (req, res, next) => {
-
+app.all(/(.*)/, (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 
   /* Whenever we pass anything into next, Express will assume that it is an error,

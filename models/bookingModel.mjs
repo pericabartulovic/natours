@@ -22,17 +22,23 @@ const bookingSchema = new mongoose.Schema({
   paid: {
     type: Boolean,
     default: true
-  }
+  },
+  stripeSessionId: {
+    type: String,
+    index: true,
+    unique: true, // optional, if you guarantee one booking per session
+    sparse: true, // allow docs without this field
+  },
 });
 
-bookingSchema.pre(/^find/, function (next) {
-  this.populate('user').populate({
-    path: 'tour',
-    select: 'name',
-  });
+bookingSchema.index({ user: 1, tour: 1 });
+bookingSchema.index({ createdAt: -1 });
 
+bookingSchema.pre(/^find/, function (next) {
+  this.populate({ path: 'tour', select: 'name price slug' })
+    .populate({ path: 'user', select: 'name email' });
   next();
-})
+});
 
 const Booking = mongoose.model('Booking', bookingSchema);
 

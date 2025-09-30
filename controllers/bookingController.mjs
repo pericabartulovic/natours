@@ -54,39 +54,56 @@ const bookingController = {
     });
   }),
 
-  createBookingCheckout: async session => {
-    const tourId = session.client_reference_id;
-    const user = (await User.findOne({ email: session.customer_email })).id;
-    const price = session.line_items.data[0].amount_total / 100;
+  createBookingCheckout: async (session) => {
+    // Ensure paid and avoid duplicates
+    if (session.mode !== 'payment' || session.payment_status !== 'paid') return;
 
-    if (tourId && user) {
-      await Booking.create({ tour: tourId, user, price });
+    // Optional: extract userId and tourId from client_reference_id
+    let tourId = session.client_reference_id;
+    let userId = null;
+
+    if (tourId && tourId.includes(':')) {
+      const [userIdStr, tourIdStr] = tourId.split(':');
+      userId = userIdStr;
+      tourId = tourIdStr;
+    } else {
+      // Fallbacks
+      tourId = session.client_reference_id || session.metadata?.tourId;
+      const userDoc = await User.findOne({ email: session.customer_email });
+      userId = userDoc?.id;
     }
+
+    const amount = session.amount_total ?? session.line_items?.data?.[0]?.amount_total;
+    if (!tourId || !userId || !amount) return;
+
+    const price = amount / 100;
+
+    // Idempotency: skip if already fulfilled for this session
+    const existing = await Booking.findOne({ stripeSessionId: session.id });
+    if (existing) return;
+
+    await Booking.create({
+      tour: tourId,
+      user: userId,
+      price,
+      paid: true,
+      stripeSessionId: session.id
+    });
   },
 
   webhookCheckout: async (req, res) => {
     const signature = req.headers['stripe-signature'];
     let event;
-
     try {
-      event = stripe.webhooks.constructEvent(
-        req.body, // must be raw body
-        signature,
-        process.env.STRIPE_WEBHOOK_SECRET
-      );
+      event = stripe.webhooks.constructEvent(req.body, signature, process.env.STRIPE_WEBHOOK_SECRET);
     } catch (err) {
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
     if (event.type === 'checkout.session.completed') {
-      const session = await stripe.checkout.sessions.retrieve(
-        event.data.object.id,
-        { expand: ['line_items'] }
-      );
-
-      bookingController.createBookingCheckout(session).catch(err =>
-        console.error('Booking creation failed:', err)
-      );
+      const session = await stripe.checkout.sessions.retrieve(event.data.object.id, { expand: ['line_items'] });
+      // Kick off fulfillment, but don't block the webhook; log errors
+      bookingController.createBookingCheckout(session).catch(err => console.error('Booking creation failed:', err));
     }
 
     res.status(200).json({ received: true });

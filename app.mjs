@@ -17,6 +17,7 @@ import tourRouter from './routes/tourRoutes.mjs';
 import userRouter from './routes/userRoutes.mjs';
 import reviewRouter from './routes/reviewRoutes.mjs';
 import bookingRouter from './routes/bookingRoutes.mjs';
+import bookingController from './controllers/bookingController.mjs';
 import AppError from './utils/appError.mjs';
 import globalErrorHandler from './controllers/errorController.mjs';
 
@@ -57,6 +58,8 @@ const limiter = rateLimit({
 });
 
 app.use('/api', limiter);
+
+app.post('/webhook-checkout', express.raw({ type: 'application/json' }), bookingController.webhookCheckout);
 
 // Body parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));

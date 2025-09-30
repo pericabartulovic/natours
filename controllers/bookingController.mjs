@@ -24,7 +24,7 @@ const bookingController = {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
-      success_url: `${process.env.CLIENT_ORIGIN}/my-bookings`,
+      success_url: `${process.env.CLIENT_ORIGIN}/users/me/my-bookings`,
       cancel_url: `${process.env.CLIENT_ORIGIN}/tour/${tour.slug}`,
       customer_email: req.user.email,
       client_reference_id: req.params.tourId,

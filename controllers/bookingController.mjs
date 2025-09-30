@@ -24,7 +24,7 @@ const bookingController = {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
-      success_url: `${process.env.CLIENT_ORIGIN}/users/me/my-bookings`,
+      success_url: `${process.env.CLIENT_ORIGIN}/users/me/my-bookings?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.CLIENT_ORIGIN}/tour/${tour.slug}`,
       customer_email: req.user.email,
       client_reference_id: req.params.tourId,
@@ -57,30 +57,23 @@ const bookingController = {
   createBookingCheckout: async (session) => {
     // Ensure paid and avoid duplicates
     if (session.mode !== 'payment' || session.payment_status !== 'paid') return;
-
-    // Optional: extract userId and tourId from client_reference_id
-    let tourId = session.client_reference_id;
-    let userId = null;
-
-    if (tourId && tourId.includes(':')) {
-      const [userIdStr, tourIdStr] = tourId.split(':');
-      userId = userIdStr;
-      tourId = tourIdStr;
-    } else {
-      // Fallbacks
-      tourId = session.client_reference_id || session.metadata?.tourId;
-      const userDoc = await User.findOne({ email: session.customer_email });
-      userId = userDoc?.id;
-    }
-
-    const amount = session.amount_total ?? session.line_items?.data?.[0]?.amount_total;
-    if (!tourId || !userId || !amount) return;
-
-    const price = amount / 100;
-
     // Idempotency: skip if already fulfilled for this session
     const existing = await Booking.findOne({ stripeSessionId: session.id });
     if (existing) return;
+
+    // Resolve user and tour
+    const tourId = session.client_reference_id || session.metadata?.tourId;
+    let userId = null;
+    if (session.customer_email) {
+      const userDoc = await User.findOne({ email: session.customer_email });
+      userId = userDoc?.id;
+    }
+    if (!tourId || !userId) return;
+
+    // Amount in cents -> major units
+    const amountCents = session.amount_total ?? session?.line_items?.data?.[0]?.amount_total;
+    if (!amountCents) return;
+    const price = amountCents / 100;
 
     await Booking.create({
       tour: tourId,

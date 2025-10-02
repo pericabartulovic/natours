@@ -7,6 +7,7 @@ const router = express.Router();
 router.use(authController.protect)
 
 router
+  .get('checkout-session/:session_id', bookingController.retrievePaymentStatus)
   .post(
     '/checkout-session/:tourId',
     bookingController.createCheckoutSession

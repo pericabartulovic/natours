@@ -101,6 +101,14 @@ const bookingController = {
 
     res.status(200).json({ received: true });
   },
+
+  retrievePaymentStatus: catchAsync(async (req, res) => {
+    const session = await stripe.checkout.sessions.retrieve(req.params.id);
+
+    res.status(200).json({
+      payment_status: session.payment_status
+    });
+  })
 };
 
 export default bookingController;

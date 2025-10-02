@@ -21,7 +21,7 @@ const createSendToken = (user, statusCode, req, res) => {
       process.env.NODE_ENV === 'production'
         ? req.secure || req.headers['x-forwarded-proto'] === 'https'
         : false, // only true in production
-    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax'
+    sameSite: process.env.NODE_ENV === 'production' ? 'Lax' : 'None'
   });
 
   // Remove password from output

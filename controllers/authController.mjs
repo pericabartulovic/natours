@@ -21,7 +21,8 @@ const createSendToken = (user, statusCode, req, res) => {
       process.env.NODE_ENV === 'production'
         ? req.secure || req.headers['x-forwarded-proto'] === 'https'
         : false, // only true in production
-    sameSite: process.env.NODE_ENV === 'production' ? 'Lax' : 'None'
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    path: '/'
   });
 
   // Remove password from output
@@ -81,6 +82,9 @@ const authController = {
     res.cookie('jwt', 'loggedout', {
       expires: new Date(0),
       httpOnly: true,
+      secure: true,
+      sameSite: 'None',
+      path: '/'
     });
     res.status(200).json({ status: 'success' });
   },

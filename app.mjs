@@ -36,6 +36,7 @@ app.use(helmet());         //always as first middleware
 app.use(cors({
   origin: [
     process.env.CLIENT_ORIGIN,
+    process.env.CLIENT_ORIGIN_VUE,
     process.env.DEVELOPMENT_BASE_URL,
     'http://localhost:4200',
   ],
